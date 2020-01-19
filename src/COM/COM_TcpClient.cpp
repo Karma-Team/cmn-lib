@@ -1,9 +1,6 @@
-/*
- * COM_TcpClient.cpp
- *
- *  Created on: 12 janv. 2020
- *      Author: ahu
- */
+/**
+ * "COM_TcpClient.cpp"
+ **/
 
 
 
@@ -13,14 +10,28 @@
 
 COM::CTcpClient::CTcpClient()
 {
-    m_serverSocketAddrSize	= 0;
-    m_serverIpAddress		= TCP_SERVER_IP_ADDRESS;
-    m_clientInput			= "";
-    m_clientRequestedMsgId	= 0;
-    m_serverPort	 		= TCP_SERVER_PORT;
-    m_receivedBytesNb 		= 0;
-	m_clientSocket			= -1;
-    strcpy(m_buffer, 		"");
+    m_serverSocketAddrSize			= 0;
+    m_serverIpAddress 				= TCP_SERVER_IP_ADDRESS;
+    m_clientInputMsg				= "";
+    m_clientRequestedMsgId			= 0;
+	m_clientSocket					= -1;
+    m_serverSocketPort				= TCP_SERVER_PORT;
+    m_clientReceivedBytesNb 		= 0;
+    strcpy(m_clientReceivedBuffer, 	"");
+}
+
+
+
+COM::CTcpClient::CTcpClient(int p_serverSocketPort, string p_serverSocketIpAddr)
+{
+    m_serverSocketAddrSize			= 0;
+	m_serverIpAddress				= p_serverSocketIpAddr;
+    m_clientInputMsg				= "";
+    m_clientRequestedMsgId			= 0;
+	m_clientSocket					= -1;
+	m_serverSocketPort				= p_serverSocketPort;
+    m_clientReceivedBytesNb 		= 0;
+    strcpy(m_clientReceivedBuffer, 	"");
 }
 
 
@@ -31,7 +42,6 @@ COM::CTcpClient::~CTcpClient()
     	close(m_clientSocket);
 		cout << "TCP client socket closed" << endl;
 }
-
 
 
 
@@ -49,7 +59,7 @@ int COM::CTcpClient::initTcpClient()
 
 	// Connect the client socket to the server one
 		m_serverSocketAddr.sin_family 	= AF_INET;
-		m_serverSocketAddr.sin_port 	= htons(m_serverPort);
+		m_serverSocketAddr.sin_port 	= htons(m_serverSocketPort);
 		if(inet_pton(AF_INET, m_serverIpAddress.c_str(), &m_serverSocketAddr.sin_addr) != 1)
 		{
 			cerr << "Can't convert the Internet address! Quitting" << endl;
@@ -80,8 +90,8 @@ int COM::CTcpClient::startTcpClient()
 			{
 				// Enter msg id
 					cout << "> Client requested msg id : ";
-					getline(cin, m_clientInput);
-					m_clientRequestedMsgId = strtoul(m_clientInput.c_str(), NULL, 16);
+					getline(cin, m_clientInputMsg);
+					m_clientRequestedMsgId = strtoul(m_clientInputMsg.c_str(), NULL, 16);
 					cout << "> " << hex << m_clientRequestedMsgId;
 					l_MsgIdValid = 1;
 					switch(m_clientRequestedMsgId)
@@ -130,15 +140,15 @@ int COM::CTcpClient::startTcpClient()
 						cout << "> Request sent to server \r\n";
 
 					// Wait for response from server and then display it
-						memset(m_buffer, 0, 4096);
-						m_receivedBytesNb = recv(m_clientSocket, m_buffer, 4096, 0);
-						if (m_receivedBytesNb == -1)
+						memset(m_clientReceivedBuffer, 0, 4096);
+						m_clientReceivedBytesNb = recv(m_clientSocket, m_clientReceivedBuffer, 4096, 0);
+						if (m_clientReceivedBytesNb == -1)
 						{
 							cerr << "Error in recv()!" << endl;
 						}
 						else
 						{
-							cout << "SERVER > " << string(m_buffer, m_receivedBytesNb) << "\r\n";
+							cout << "SERVER > " << string(m_clientReceivedBuffer, m_clientReceivedBytesNb) << "\r\n";
 						}
 				}
 			} while(true);

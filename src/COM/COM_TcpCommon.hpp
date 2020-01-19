@@ -1,9 +1,6 @@
-/*
- * COM_TcpCommon.hpp
- *
- *  Created on: 13 janv. 2020
- *      Author: ahu
- */
+/**
+ * "COM_TcpCommon.hpp"
+ **/
 
 
 

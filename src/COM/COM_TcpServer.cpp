@@ -1,9 +1,6 @@
-/*
- * COM_TcpServer.cpp
- *
- *  Created on: 12 janv. 2020
- *      Author: ahu
- */
+/**
+ * "COM_TcpServer.cpp"
+ **/
 
 
 
@@ -13,17 +10,34 @@
 
 COM::CTcpServer::CTcpServer()
 {
-    m_serverSocketAddrSize	= 0;
-    m_clientSocketAddrSize	= 0;
-    m_serverIpAddress		= TCP_SERVER_IP_ADDRESS;
-    m_serverPort			= TCP_SERVER_PORT;
-    m_clientRequestedMsgId 	= 0;
-    m_receivedBytesNb 		= 0;
-	m_serverSocket			= -1;
-	m_clientSocket			= -1;
-    strcpy(m_buffer, 		"");
-    strcpy(m_clientName, 	"");
-    strcpy(m_clientPort, 	"");
+    m_serverSocketAddrSize			= 0;
+    m_clientSocketAddrSize			= 0;
+    m_serverIpAddress 				= TCP_SERVER_IP_ADDRESS;
+    m_serverSocketPort				= TCP_SERVER_PORT;
+    m_clientRequestedMsgId 			= 0;
+    m_serverReceivedBytesNb 		= 0;
+	m_serverSocket					= -1;
+	m_clientSocket					= -1;
+    strcpy(m_serverReceivedBuffer, 	"");
+    strcpy(m_clientName, 			"");
+    strcpy(m_clientPort, 			"");
+}
+
+
+
+COM::CTcpServer::CTcpServer(int p_serverSocketPort, string p_serverSocketIpAddr)
+{
+    m_serverSocketAddrSize			= 0;
+    m_clientSocketAddrSize			= 0;
+    m_serverIpAddress 				= p_serverSocketIpAddr;
+    m_serverSocketPort				= p_serverSocketPort;
+    m_clientRequestedMsgId 			= 0;
+    m_serverReceivedBytesNb 		= 0;
+	m_serverSocket					= -1;
+	m_clientSocket					= -1;
+    strcpy(m_serverReceivedBuffer, 	"");
+    strcpy(m_clientName, 			"");
+    strcpy(m_clientPort, 			"");
 }
 
 
@@ -52,7 +66,7 @@ int COM::CTcpServer::initTcpServer()
 
     // Assign an address and a port to the TCP server socket
 		m_serverSocketAddr.sin_family	= AF_INET;
-		m_serverSocketAddr.sin_port 	= htons(m_serverPort);
+		m_serverSocketAddr.sin_port 	= htons(m_serverSocketPort);
 		if(inet_pton(AF_INET, m_serverIpAddress.c_str(), &m_serverSocketAddr.sin_addr) != 1)
 		{
 			cerr << "Can't convert the Internet address! Quitting" << endl;
@@ -107,16 +121,16 @@ int COM::CTcpServer::startTcpServer()
 			while(true)
 			{
 				// Initialize the buffer
-					memset(m_buffer, 0, BUFFER_SIZE);
+					memset(m_serverReceivedBuffer, 0, BUFFER_SIZE);
 
 				// Wait for the client to send data
-					m_receivedBytesNb = recv(m_clientSocket, &m_clientRequestedMsgId, sizeof(m_clientRequestedMsgId), 0);
-					if(m_receivedBytesNb == -1)
+					m_serverReceivedBytesNb = recv(m_clientSocket, &m_clientRequestedMsgId, sizeof(m_clientRequestedMsgId), 0);
+					if(m_serverReceivedBytesNb == -1)
 					{
 						cerr << "Error in recv()! Quitting" << endl;
 						break;
 					}
-					if(m_receivedBytesNb == 0)
+					if(m_serverReceivedBytesNb == 0)
 					{
 						cout << "Client disconnected! Quitting " << endl;
 						break;
@@ -124,7 +138,7 @@ int COM::CTcpServer::startTcpServer()
 					cout << "> Request msg id received from client : " << hex << m_clientRequestedMsgId << endl;
 
 				// Echo message back to client
-					if(send(m_clientSocket, m_buffer, m_receivedBytesNb + 1, 0) == -1)
+					if(send(m_clientSocket, m_serverReceivedBuffer, m_serverReceivedBytesNb + 1, 0) == -1)
 					{
 						cout << "Can't send data back to client! Quitting " << endl;
 					}
