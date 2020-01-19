@@ -46,20 +46,37 @@ namespace COM
 			int initTcpClient();
 
 			/**
-				@brief method to start the TCP client socket
+				@brief method to send a request message ID to TCP server
+				@param[in] p_RequestedMsgId : client requested message ID
+				@return -1 if failed
 			 **/
-			int startTcpClient();
+			int sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId);
+
+			/**
+				@brief methods to receive a message from TCP server
+				@return -1 if failed
+			 **/
+			int receivePathMsgFromServer();
+			int receivePathCorrectionMsgFromServer();
+			int receiveWorkShopOrderMsgFromServer();
+			int receiveStopMsgFromServer();
+			int receiveWorkShopReportMsgFromServer();
+			int receiveBitReportMsgFromServer();
+			int receiveErrorMsgFromServer();
 
 		private:
-		    sockaddr_in m_serverSocketAddr;						//< TCP server socket address
-		    socklen_t	m_serverSocketAddrSize;					//< TCP server socket address size
-		    string 		m_serverIpAddress;						//< TCP server IP address
-		    string 		m_clientInputMsg;						//< TCP client input message
-			int 		m_clientRequestedMsgId;					//< TCP client requested message ID
-		    int 		m_clientSocket;							//< TCP client socket
-		    int 		m_serverSocketPort;						//< TCP server socket port
-			int 		m_clientReceivedBytesNb;				//< TCP client received bytes number from TCP server
-		    char 		m_clientReceivedBuffer[BUFFER_SIZE];	//< TCP client received buffer from TCP server
+			SPathMsgBody* 			m_pathMsgBody; 							//< TCP client reception buffer for path message from server
+			SPathCorrectionMsgBody* m_pathCorrectionMsgBody;				//< TCP client reception buffer for path correction message from server
+			SWorkShopOrderMsgBody* 	m_workShopOrderMsgBody;					//< TCP client reception buffer for workshop order message from server
+			SStopMsgBody*		 	m_stopMsgBody;							//< TCP client reception buffer for stop message from server
+			SWorkShopReportMsgBody*	m_workShopReportMsgBody;				//< TCP client reception buffer for workshop order report message
+			SBitReportMsgBody* 		m_bitReportMsgBody;						//< TCP client reception buffer for bit report message from server from server
+			SErrorMsgBody* 			m_errorMsgBody;							//< TCP client reception buffer for error message from server
+		    sockaddr_in 			m_serverSocketAddr;						//< TCP server socket address
+		    string 					m_serverIpAddress;						//< TCP server IP address
+		    int 					m_clientSocket;							//< TCP client socket
+		    int 					m_serverSocketPort;						//< TCP server socket port
+			int 					m_clientReceivedBytesNb;				//< TCP client received bytes number from TCP server
 	};
 }
 

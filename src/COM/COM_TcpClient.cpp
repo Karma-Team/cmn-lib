@@ -10,28 +10,20 @@
 
 COM::CTcpClient::CTcpClient()
 {
-    m_serverSocketAddrSize			= 0;
     m_serverIpAddress 				= TCP_SERVER_IP_ADDRESS;
-    m_clientInputMsg				= "";
-    m_clientRequestedMsgId			= 0;
 	m_clientSocket					= -1;
     m_serverSocketPort				= TCP_SERVER_PORT;
     m_clientReceivedBytesNb 		= 0;
-    strcpy(m_clientReceivedBuffer, 	"");
 }
 
 
 
 COM::CTcpClient::CTcpClient(int p_serverSocketPort, string p_serverSocketIpAddr)
 {
-    m_serverSocketAddrSize			= 0;
 	m_serverIpAddress				= p_serverSocketIpAddr;
-    m_clientInputMsg				= "";
-    m_clientRequestedMsgId			= 0;
 	m_clientSocket					= -1;
 	m_serverSocketPort				= p_serverSocketPort;
     m_clientReceivedBytesNb 		= 0;
-    strcpy(m_clientReceivedBuffer, 	"");
 }
 
 
@@ -48,6 +40,7 @@ COM::CTcpClient::~CTcpClient()
 int COM::CTcpClient::initTcpClient()
 {
 	cout << "Initialize the TCP client" << endl;
+    socklen_t l_serverSocketAddrSize;
 
     // Create the client socket
 		m_clientSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -66,8 +59,8 @@ int COM::CTcpClient::initTcpClient()
 			return -1;
 		}
 
-		m_serverSocketAddrSize = sizeof(m_serverSocketAddr);
-		if(connect(m_clientSocket, (sockaddr*)&m_serverSocketAddr, m_serverSocketAddrSize) == -1)
+		l_serverSocketAddrSize = sizeof(m_serverSocketAddr);
+		if(connect(m_clientSocket, (sockaddr*)&m_serverSocketAddr, l_serverSocketAddrSize) == -1)
 		{
 			cerr << "Can't connect the client socket to the server one! Quitting" << endl;
 			return -1;
@@ -78,89 +71,133 @@ int COM::CTcpClient::initTcpClient()
 
 
 
-int COM::CTcpClient::startTcpClient()
+int COM::CTcpClient::sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId)
 {
-	int l_MsgIdValid;
-	cout << "Start the TCP client" << endl;
-
-	if(m_clientSocket != -1)
+	if(send(m_clientSocket, &p_RequestedMsgId, sizeof(p_RequestedMsgId), 0) == -1)
 	{
-	    //	While loop: send and receive message back from server
-			do
-			{
-				// Enter msg id
-					cout << "> Client requested msg id : ";
-					getline(cin, m_clientInputMsg);
-					m_clientRequestedMsgId = strtoul(m_clientInputMsg.c_str(), NULL, 16);
-					cout << "> " << hex << m_clientRequestedMsgId;
-					l_MsgIdValid = 1;
-					switch(m_clientRequestedMsgId)
-					{
-						case MSG_ID_PATH:
-							cout << " = MSG_ID_PATH \r\n";
-							break;
+		cout << "Can't send requested message ID to server! Please try again \r\n";
+		return -1;
+	}
+	cout << "> Requested message ID sent to server \r\n";
 
-						case MSG_ID_PATH_CORRECTION:
-							cout << " = MSG_ID_PATH_CORRECTION \r\n";
-							break;
+	return 1;
+}
 
-						case MSG_ID_WORKSHOP_ORDER:
-							cout << " = MSG_ID_WORKSHOP_ORDER \r\n";
-							break;
 
-						case MSG_ID_STOP:
-							cout << " = MSG_ID_STOP \r\n";
-							break;
 
-						case MSG_ID_WORKSHOP_REPORT:
-							cout << " = MSG_ID_WORKSHOP_REPORT \r\n";
-							break;
-
-						case MSG_ID_BIT_REPORT:
-							cout << " = MSG_ID_BIT_REPORT \r\n";
-							break;
-
-						case MSG_ID_ERROR:
-							cout << " = MSG_ID_ERROR \r\n";
-							break;
-
-						default:
-							cout << " -> UNKNOWN MSG ID \r\n";
-							l_MsgIdValid = 0;
-					}
-
-				if(l_MsgIdValid != 0)
-				{
-					// Send data to server
-						if(send(m_clientSocket, &m_clientRequestedMsgId, sizeof(m_clientRequestedMsgId), 0) == -1)
-						{
-							cout << "Can't send data to server! Please try again \r\n";
-							continue;
-						}
-						cout << "> Request sent to server \r\n";
-
-					// Wait for response from server and then display it
-						memset(m_clientReceivedBuffer, 0, 4096);
-						m_clientReceivedBytesNb = recv(m_clientSocket, m_clientReceivedBuffer, 4096, 0);
-						if (m_clientReceivedBytesNb == -1)
-						{
-							cerr << "Error in recv()!" << endl;
-						}
-						else
-						{
-							cout << "SERVER > " << string(m_clientReceivedBuffer, m_clientReceivedBytesNb) << "\r\n";
-						}
-				}
-			} while(true);
-
-	    //	Close the client socket
-	    	close(m_clientSocket);
+int COM::CTcpClient::receivePathMsgFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_pathMsgBody, sizeof(m_pathMsgBody), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "Error in recv()!" << endl;
+		return -1;
 	}
 	else
 	{
-		cerr << "TCP client is not initialized! Quitting" << endl;
+		cout << "Path message received from server" << "\r\n";
+	}
+	return 1;
+}
+
+
+
+int COM::CTcpClient::receivePathCorrectionMsgFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_pathCorrectionMsgBody, sizeof(m_pathCorrectionMsgBody), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "Error in recv()!" << endl;
 		return -1;
 	}
+	else
+	{
+		cout << "Path correction message received from server" << "\r\n";
+	}
+	return 1;
+}
 
+
+
+int COM::CTcpClient::receiveWorkShopOrderMsgFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_workShopOrderMsgBody, sizeof(m_workShopOrderMsgBody), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "Error in recv()!" << endl;
+		return -1;
+	}
+	else
+	{
+		cout << "Workshop order message received from server" << "\r\n";
+	}
+	return 1;
+}
+
+
+
+int COM::CTcpClient::receiveStopMsgFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_stopMsgBody, sizeof(m_stopMsgBody), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "Error in recv()!" << endl;
+		return -1;
+	}
+	else
+	{
+		cout << "Stop message received from server" << "\r\n";
+	}
+	return 1;
+}
+
+
+
+int COM::CTcpClient::receiveWorkShopReportMsgFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_workShopReportMsgBody, sizeof(m_workShopReportMsgBody), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "Error in recv()!" << endl;
+		return -1;
+	}
+	else
+	{
+		cout << "Workshop report message received from server" << "\r\n";
+	}
+	return 1;
+}
+
+
+
+int COM::CTcpClient::receiveBitReportMsgFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_bitReportMsgBody, sizeof(m_bitReportMsgBody), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "Error in recv()!" << endl;
+		return -1;
+	}
+	else
+	{
+		cout << "Bit report message received from server" << "\r\n";
+	}
+	return 1;
+}
+
+
+
+int COM::CTcpClient::receiveErrorMsgFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_errorMsgBody, sizeof(m_errorMsgBody), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "Error in recv()!" << endl;
+		return -1;
+	}
+	else
+	{
+		cout << "Error message received from server" << "\r\n";
+	}
 	return 1;
 }
