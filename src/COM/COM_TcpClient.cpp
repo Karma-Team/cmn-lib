@@ -87,7 +87,7 @@ int COM::CTcpClient::sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId)
 
 int COM::CTcpClient::receivePathMsgFromServer()
 {
-	m_clientReceivedBytesNb = recv(m_clientSocket, m_pathMsgBody, sizeof(m_pathMsgBody), 0);
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_pathMsgBody, sizeof(SPathMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
 	{
 		cerr << "Error in recv()!" << endl;
@@ -104,7 +104,7 @@ int COM::CTcpClient::receivePathMsgFromServer()
 
 int COM::CTcpClient::receivePathCorrectionMsgFromServer()
 {
-	m_clientReceivedBytesNb = recv(m_clientSocket, m_pathCorrectionMsgBody, sizeof(m_pathCorrectionMsgBody), 0);
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_pathCorrectionMsgBody, sizeof(SPathCorrectionMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
 	{
 		cerr << "Error in recv()!" << endl;
@@ -121,7 +121,7 @@ int COM::CTcpClient::receivePathCorrectionMsgFromServer()
 
 int COM::CTcpClient::receiveWorkShopOrderMsgFromServer()
 {
-	m_clientReceivedBytesNb = recv(m_clientSocket, m_workShopOrderMsgBody, sizeof(m_workShopOrderMsgBody), 0);
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_workShopOrderMsgBody, sizeof(SWorkShopOrderMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
 	{
 		cerr << "Error in recv()!" << endl;
@@ -138,7 +138,7 @@ int COM::CTcpClient::receiveWorkShopOrderMsgFromServer()
 
 int COM::CTcpClient::receiveStopMsgFromServer()
 {
-	m_clientReceivedBytesNb = recv(m_clientSocket, m_stopMsgBody, sizeof(m_stopMsgBody), 0);
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_stopMsgBody, sizeof(SStopMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
 	{
 		cerr << "Error in recv()!" << endl;
@@ -155,7 +155,7 @@ int COM::CTcpClient::receiveStopMsgFromServer()
 
 int COM::CTcpClient::receiveWorkShopReportMsgFromServer()
 {
-	m_clientReceivedBytesNb = recv(m_clientSocket, m_workShopReportMsgBody, sizeof(m_workShopReportMsgBody), 0);
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_workShopReportMsgBody, sizeof(SWorkShopReportMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
 	{
 		cerr << "Error in recv()!" << endl;
@@ -172,7 +172,7 @@ int COM::CTcpClient::receiveWorkShopReportMsgFromServer()
 
 int COM::CTcpClient::receiveBitReportMsgFromServer()
 {
-	m_clientReceivedBytesNb = recv(m_clientSocket, m_bitReportMsgBody, sizeof(m_bitReportMsgBody), 0);
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_bitReportMsgBody, sizeof(SBitReportMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
 	{
 		cerr << "Error in recv()!" << endl;
@@ -189,7 +189,7 @@ int COM::CTcpClient::receiveBitReportMsgFromServer()
 
 int COM::CTcpClient::receiveErrorMsgFromServer()
 {
-	m_clientReceivedBytesNb = recv(m_clientSocket, m_errorMsgBody, sizeof(m_errorMsgBody), 0);
+	m_clientReceivedBytesNb = recv(m_clientSocket, m_errorMsgBody, sizeof(SErrorMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
 	{
 		cerr << "Error in recv()!" << endl;

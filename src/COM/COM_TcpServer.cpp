@@ -14,7 +14,6 @@ COM::CTcpServer::CTcpServer()
     m_clientSocketAddrSize			= 0;
     m_serverIpAddress 				= TCP_SERVER_IP_ADDRESS;
     m_serverSocketPort				= TCP_SERVER_PORT;
-    m_clientRequestedMsgId 			= 0;
     m_serverReceivedBytesNb 		= 0;
 	m_serverSocket					= -1;
 	m_clientSocket					= -1;
@@ -31,7 +30,6 @@ COM::CTcpServer::CTcpServer(int p_serverSocketPort, string p_serverSocketIpAddr)
     m_clientSocketAddrSize			= 0;
     m_serverIpAddress 				= p_serverSocketIpAddr;
     m_serverSocketPort				= p_serverSocketPort;
-    m_clientRequestedMsgId 			= 0;
     m_serverReceivedBytesNb 		= 0;
 	m_serverSocket					= -1;
 	m_clientSocket					= -1;
@@ -98,6 +96,8 @@ int COM::CTcpServer::startTcpServer()
 {
 	cout << "Start the TCP server" << endl;
 
+	int 	l_clientRequestedMsgId;
+
 	if(m_serverSocket != -1)
 	{
 		// Wait for a client connection
@@ -124,7 +124,7 @@ int COM::CTcpServer::startTcpServer()
 					memset(m_serverReceivedBuffer, 0, BUFFER_SIZE);
 
 				// Wait for the client to send data
-					m_serverReceivedBytesNb = recv(m_clientSocket, &m_clientRequestedMsgId, sizeof(m_clientRequestedMsgId), 0);
+					m_serverReceivedBytesNb = recv(m_clientSocket, &l_clientRequestedMsgId, sizeof(l_clientRequestedMsgId), 0);
 					if(m_serverReceivedBytesNb == -1)
 					{
 						cerr << "Error in recv()! Quitting" << endl;
@@ -135,12 +135,48 @@ int COM::CTcpServer::startTcpServer()
 						cout << "Client disconnected! Quitting " << endl;
 						break;
 					}
-					cout << "> Request msg id received from client : " << hex << m_clientRequestedMsgId << endl;
 
-				// Echo message back to client
-					if(send(m_clientSocket, m_serverReceivedBuffer, m_serverReceivedBytesNb + 1, 0) == -1)
+				// Send requested message to client
+					cout << "> Request msg id received from client : " << hex << l_clientRequestedMsgId << endl;
+					switch(l_clientRequestedMsgId)
 					{
-						cout << "Can't send data back to client! Quitting " << endl;
+						case MSG_ID_PATH:
+							cout << "> Requested message from client : MSG_ID_PATH \r\n";
+							sendPathMsgToClient();
+							break;
+
+						case MSG_ID_PATH_CORRECTION:
+							cout << "> Requested message from client : MSG_ID_PATH_CORRECTION \r\n";
+							sendPathCorrectionMsgToClient();
+							break;
+
+						case MSG_ID_WORKSHOP_ORDER:
+							cout << "> Requested message from client : MSG_ID_WORKSHOP_ORDER \r\n";
+							sendWorkShopOrderMsgToClient();
+							break;
+
+						case MSG_ID_STOP:
+							cout << "> Requested message from client : MSG_ID_STOP \r\n";
+							sendStopMsgToClient();
+							break;
+
+						case MSG_ID_WORKSHOP_REPORT:
+							cout << "> Requested message from client : MSG_ID_WORKSHOP_REPORT \r\n";
+							sendWorkShopReportMsgToClient();
+							break;
+
+						case MSG_ID_BIT_REPORT:
+							cout << "> Requested message from client : MSG_ID_BIT_REPORT \r\n";
+							sendBitReportMsgToClient();
+							break;
+
+						case MSG_ID_ERROR:
+							cout << "> Requested message from client : MSG_ID_ERROR \r\n";
+							sendErrorMsgToClient();
+							break;
+
+						default:
+							cout << "> Unknown message ID \r\n";
 					}
 			}
 
@@ -152,6 +188,104 @@ int COM::CTcpServer::startTcpServer()
 		cerr << "TCP server is not initialized! Quitting" << endl;
 		return -1;
 	}
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendPathMsgToClient()
+{
+	if(send(m_clientSocket, m_pathMsgBody, sizeof(SPathMsgBody), 0) == -1)
+	{
+		cout << "Can't send path message to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "Path message sent to client" << "\r\n";
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendPathCorrectionMsgToClient()
+{
+	if(send(m_clientSocket, m_pathCorrectionMsgBody, sizeof(SPathCorrectionMsgBody)+1, 0) == -1)
+	{
+		cout << "Can't send path correction message to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "Path correction message sent to client" << "\r\n";
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendWorkShopOrderMsgToClient()
+{
+	if(send(m_clientSocket, m_workShopOrderMsgBody, sizeof(SWorkShopOrderMsgBody), 0) == -1)
+	{
+		cout << "Can't send workshop order message to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "Workshop order message sent to client" << "\r\n";
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendStopMsgToClient()
+{
+	if(send(m_clientSocket, m_stopMsgBody, sizeof(SStopMsgBody), 0) == -1)
+	{
+		cout << "Can't send stop message to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "Stop message sent to client" << "\r\n";
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendWorkShopReportMsgToClient()
+{
+	if(send(m_clientSocket, m_workShopReportMsgBody, sizeof(SWorkShopReportMsgBody), 0) == -1)
+	{
+		cout << "Can't send workshop report message to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "Workshop report message sent to client" << "\r\n";
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendBitReportMsgToClient()
+{
+	if(send(m_clientSocket, m_bitReportMsgBody, sizeof(SBitReportMsgBody), 0) == -1)
+	{
+		cout << "Can't send bit report message to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "Bit report message sent to client" << "\r\n";
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendErrorMsgToClient()
+{
+	if(send(m_clientSocket, m_errorMsgBody, sizeof(SErrorMsgBody), 0) == -1)
+	{
+		cout << "Can't send Error message to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "Error message sent to client" << "\r\n";
 
 	return 1;
 }
