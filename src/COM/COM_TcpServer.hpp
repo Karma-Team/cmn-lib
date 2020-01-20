@@ -63,13 +63,13 @@ namespace COM
 			int sendErrorMsgToClient();
 
 		private:
-			SPathMsgBody* 			m_pathMsgBody; 							//< TCP server send buffer for path message from server
-			SPathCorrectionMsgBody* m_pathCorrectionMsgBody;				//< TCP server reception buffer for path correction message from server
-			SWorkShopOrderMsgBody* 	m_workShopOrderMsgBody;					//< TCP server reception buffer for workshop order message from server
-			SStopMsgBody*		 	m_stopMsgBody;							//< TCP server reception buffer for stop message from server
-			SWorkShopReportMsgBody*	m_workShopReportMsgBody;				//< TCP server reception buffer for workshop order report message
-			SBitReportMsgBody* 		m_bitReportMsgBody;						//< TCP server reception buffer for bit report message from server from server
-			SErrorMsgBody* 			m_errorMsgBody;							//< TCP server reception buffer for error message from server
+			SPathMsgBody 			m_pathMsgBody;							//< TCP server send buffer for path message from server
+			SPathCorrectionMsgBody 	m_pathCorrectionMsgBody;				//< TCP server reception buffer for path correction message from server
+			SWorkShopOrderMsgBody 	m_workShopOrderMsgBody;					//< TCP server reception buffer for workshop order message from server
+			SStopMsgBody		 	m_stopMsgBody;							//< TCP server reception buffer for stop message from server
+			SWorkShopReportMsgBody	m_workShopReportMsgBody;				//< TCP server reception buffer for workshop order report message
+			SBitReportMsgBody		m_bitReportMsgBody;						//< TCP server reception buffer for bit report message from server from server
+			SErrorMsgBody 			m_errorMsgBody;							//< TCP server reception buffer for error message from server
 			sockaddr_in 			m_serverSocketAddr;						//< TCP server socket address
 		    sockaddr_in 			m_clientSocketAddr;						//< TCP client socket address
 		    socklen_t 				m_serverSocketAddrSize;					//< TCP server socket address size
