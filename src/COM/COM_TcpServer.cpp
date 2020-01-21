@@ -141,40 +141,48 @@ int COM::CTcpServer::startTcpServer()
 					{
 						case MSG_ID_PATH:
 							cout << "> Requested message from client : MSG_ID_PATH\n";
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SPathMsgBody));
 							sendPathMsgToClient();
 							break;
 
 						case MSG_ID_PATH_CORRECTION:
 							cout << "> Requested message from client : MSG_ID_PATH_CORRECTION\n";
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SPathCorrectionMsgBody));
 							sendPathCorrectionMsgToClient();
 							break;
 
 						case MSG_ID_WORKSHOP_ORDER:
 							cout << "> Requested message from client : MSG_ID_WORKSHOP_ORDER\n";
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SWorkShopOrderMsgBody));
 							sendWorkShopOrderMsgToClient();
 							break;
 
 						case MSG_ID_STOP:
 							cout << "> Requested message from client : MSG_ID_STOP\n";
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SStopMsgBody));
 							sendStopMsgToClient();
 							break;
 
 						case MSG_ID_WORKSHOP_REPORT:
 							cout << "> Requested message from client : MSG_ID_WORKSHOP_REPORT\n";
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SWorkShopReportMsgBody));
 							sendWorkShopReportMsgToClient();
 							break;
 
 						case MSG_ID_BIT_REPORT:
 							cout << "> Requested message from client : MSG_ID_BIT_REPORT\n";
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SBitReportMsgBody));
 							sendBitReportMsgToClient();
 							break;
 
 						case MSG_ID_ERROR:
 							cout << "> Requested message from client : MSG_ID_ERROR\n";
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SErrorMsgBody));
 							sendErrorMsgToClient();
 							break;
 
 						default:
+							sendHeaderMsgToClient(l_clientRequestedMsgId[0], 0);
 							cout << "> Unknown message ID\n";
 					}
 			}
@@ -187,6 +195,23 @@ int COM::CTcpServer::startTcpServer()
 		cerr << "> TCP server is not initialized! Quitting" << endl;
 		return -1;
 	}
+
+	return 1;
+}
+
+
+
+int COM::CTcpServer::sendHeaderMsgToClient(uint32_t p_msgId, uint32_t p_msgSize)
+{
+	m_msgHeader.id 		= p_msgId;
+	m_msgHeader.size	= p_msgSize;
+
+	if(send(m_clientSocket, &m_msgHeader, sizeof(SMsgHeader), 0) == -1)
+	{
+		cout << "> Can't send message header to client! Quitting " << endl;
+		return -1;
+	}
+	cout << "> Message header sent to client" << "\n";
 
 	return 1;
 }

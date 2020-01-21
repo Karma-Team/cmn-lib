@@ -40,7 +40,8 @@ COM::CTcpClient::~CTcpClient()
 int COM::CTcpClient::initTcpClient()
 {
 	cout << "> Initialize the TCP client" << endl;
-    socklen_t l_serverSocketAddrSize;
+
+	socklen_t 	l_serverSocketAddrSize;
 
     // Create the client socket
 		m_clientSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -66,7 +67,62 @@ int COM::CTcpClient::initTcpClient()
 			return -1;
 		}
 
+	// Reception thread : wait for response from server
+		m_receptionThread = thread(&COM::CTcpClient::receptionThread, this);
+
 	return m_clientSocket;
+}
+
+
+
+void COM::CTcpClient::receptionThread()
+{
+	cout << "> Reception thread launched\n";
+
+	while(1)
+	{
+		int l_id = this->receiveMsgHeaderFromServer();
+		switch(l_id)
+		{
+			case MSG_ID_PATH:
+				cout << "> Wait for response from server : MSG_ID_PATH\n";
+				this->receivePathMsgFromServer();
+				break;
+
+			case MSG_ID_PATH_CORRECTION:
+				cout << "> Wait for response from server : MSG_ID_PATH_CORRECTION\n";
+				this->receivePathCorrectionMsgFromServer();
+				break;
+
+			case MSG_ID_WORKSHOP_ORDER:
+				cout << "> Wait for response from server : MSG_ID_WORKSHOP_ORDER\n";
+				this->receiveWorkShopOrderMsgFromServer();
+				break;
+
+			case MSG_ID_STOP:
+				cout << "> Wait for response from server : MSG_ID_STOP\n";
+				this->receiveStopMsgFromServer();
+				break;
+
+			case MSG_ID_WORKSHOP_REPORT:
+				cout << "> Wait for response from server : MSG_ID_WORKSHOP_REPORT\n";
+				this->receiveWorkShopReportMsgFromServer();
+				break;
+
+			case MSG_ID_BIT_REPORT:
+				cout << "> Wait for response from server : MSG_ID_BIT_REPORT\n";
+				this->receiveBitReportMsgFromServer();
+				break;
+
+			case MSG_ID_ERROR:
+				cout << "> Wait for response from server : MSG_ID_ERROR\n";
+				this->receiveErrorMsgFromServer();
+				break;
+
+			default:
+				cout << "> Unknown message ID\n";
+		}
+	}
 }
 
 
@@ -75,12 +131,29 @@ int COM::CTcpClient::sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId)
 {
 	if(send(m_clientSocket, &p_RequestedMsgId, sizeof(p_RequestedMsgId), 0) == -1)
 	{
-		cout << "> Can't send requested message ID to server! Please try again \r\n";
+		cout << "> Can't send requested message ID to server! Please try again\n";
 		return -1;
 	}
-	cout << "> Requested message ID sent to server \r\n";
+	cout << "> Requested message ID sent to server\n";
 
 	return 1;
+}
+
+
+
+int COM::CTcpClient::receiveMsgHeaderFromServer()
+{
+	m_clientReceivedBytesNb = recv(m_clientSocket, &m_msgHeader, sizeof(SMsgHeader), 0);
+	if (m_clientReceivedBytesNb == -1)
+	{
+		cerr << "> Error in recv()!" << endl;
+		return -1;
+	}
+	else
+	{
+		cout << "> Message header received from server" << "\n";
+	}
+	return m_msgHeader.id;
 }
 
 
@@ -95,7 +168,7 @@ int COM::CTcpClient::receivePathMsgFromServer()
 	}
 	else
 	{
-		cout << "> Path message received from server" << "\r\n";
+		cout << "> Path message received from server" << "\n";
 	}
 	return 1;
 }
@@ -112,7 +185,7 @@ int COM::CTcpClient::receivePathCorrectionMsgFromServer()
 	}
 	else
 	{
-		cout << "> Path correction message received from server" << "\r\n";
+		cout << "> Path correction message received from server" << "\n";
 	}
 	return 1;
 }
@@ -129,7 +202,7 @@ int COM::CTcpClient::receiveWorkShopOrderMsgFromServer()
 	}
 	else
 	{
-		cout << "> Workshop order message received from server" << "\r\n";
+		cout << "> Workshop order message received from server" << "\n";
 	}
 	return 1;
 }
@@ -146,7 +219,7 @@ int COM::CTcpClient::receiveStopMsgFromServer()
 	}
 	else
 	{
-		cout << "> Stop message received from server" << "\r\n";
+		cout << "> Stop message received from server" << "\n";
 	}
 	return 1;
 }
@@ -163,7 +236,7 @@ int COM::CTcpClient::receiveWorkShopReportMsgFromServer()
 	}
 	else
 	{
-		cout << "> Workshop report message received from server" << "\r\n";
+		cout << "> Workshop report message received from server" << "\n";
 	}
 	return 1;
 }
@@ -180,7 +253,7 @@ int COM::CTcpClient::receiveBitReportMsgFromServer()
 	}
 	else
 	{
-		cout << "> Bit report message received from server" << "\r\n";
+		cout << "> Bit report message received from server" << "\n";
 	}
 	return 1;
 }
@@ -197,7 +270,7 @@ int COM::CTcpClient::receiveErrorMsgFromServer()
 	}
 	else
 	{
-		cout << "> Error message received from server" << "\r\n";
+		cout << "> Error message received from server" << "\n";
 	}
 	return 1;
 }

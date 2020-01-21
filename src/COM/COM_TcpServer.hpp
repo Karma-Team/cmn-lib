@@ -54,6 +54,7 @@ namespace COM
 				@brief methods to send a message to TCP client
 				@return -1 if failed
 			 **/
+			int sendHeaderMsgToClient(uint32_t p_msgId, uint32_t p_msgSize);
 			int sendPathMsgToClient();
 			int sendPathCorrectionMsgToClient();
 			int sendWorkShopOrderMsgToClient();
@@ -63,13 +64,14 @@ namespace COM
 			int sendErrorMsgToClient();
 
 		private:
-			SPathMsgBody 			m_pathMsgBody;							//< TCP server send buffer for path message from server
-			SPathCorrectionMsgBody 	m_pathCorrectionMsgBody;				//< TCP server reception buffer for path correction message from server
-			SWorkShopOrderMsgBody 	m_workShopOrderMsgBody;					//< TCP server reception buffer for workshop order message from server
-			SStopMsgBody		 	m_stopMsgBody;							//< TCP server reception buffer for stop message from server
-			SWorkShopReportMsgBody	m_workShopReportMsgBody;				//< TCP server reception buffer for workshop order report message
-			SBitReportMsgBody		m_bitReportMsgBody;						//< TCP server reception buffer for bit report message from server from server
-			SErrorMsgBody 			m_errorMsgBody;							//< TCP server reception buffer for error message from server
+			SMsgHeader 				m_msgHeader;							//< TCP server send buffer for message header to client
+			SPathMsgBody 			m_pathMsgBody;							//< TCP server send buffer for path message to client
+			SPathCorrectionMsgBody 	m_pathCorrectionMsgBody;				//< TCP server send buffer for path correction message to client
+			SWorkShopOrderMsgBody 	m_workShopOrderMsgBody;					//< TCP server send buffer for workshop order message to client
+			SStopMsgBody		 	m_stopMsgBody;							//< TCP server send buffer for stop message to client
+			SWorkShopReportMsgBody	m_workShopReportMsgBody;				//< TCP server send buffer for workshop order report message to client
+			SBitReportMsgBody		m_bitReportMsgBody;						//< TCP server send buffer for bit report message from server to client
+			SErrorMsgBody 			m_errorMsgBody;							//< TCP server send buffer for error message to client
 			sockaddr_in 			m_serverSocketAddr;						//< TCP server socket address
 		    sockaddr_in 			m_clientSocketAddr;						//< TCP client socket address
 		    socklen_t 				m_serverSocketAddrSize;					//< TCP server socket address size

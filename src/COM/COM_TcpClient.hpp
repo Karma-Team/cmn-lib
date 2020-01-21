@@ -56,15 +56,19 @@ namespace COM
 				@brief methods to receive a message from TCP server
 				@return -1 if failed
 			 **/
-			int receivePathMsgFromServer();
-			int receivePathCorrectionMsgFromServer();
-			int receiveWorkShopOrderMsgFromServer();
-			int receiveStopMsgFromServer();
-			int receiveWorkShopReportMsgFromServer();
-			int receiveBitReportMsgFromServer();
-			int receiveErrorMsgFromServer();
+			void 	receptionThread();
+			int 	receiveMsgHeaderFromServer();
+			int 	receivePathMsgFromServer();
+			int 	receivePathCorrectionMsgFromServer();
+			int 	receiveWorkShopOrderMsgFromServer();
+			int 	receiveStopMsgFromServer();
+			int 	receiveWorkShopReportMsgFromServer();
+			int 	receiveBitReportMsgFromServer();
+			int 	receiveErrorMsgFromServer();
 
 		private:
+			thread					m_receptionThread;						//< TCP client reception thread for message from server
+			SMsgHeader 				m_msgHeader;							//< TCP client reception buffer for message header from server
 			SPathMsgBody 			m_pathMsgBody; 							//< TCP client reception buffer for path message from server
 			SPathCorrectionMsgBody	m_pathCorrectionMsgBody;				//< TCP client reception buffer for path correction message from server
 			SWorkShopOrderMsgBody 	m_workShopOrderMsgBody;					//< TCP client reception buffer for workshop order message from server

@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <string>
+#include <thread>
 
 
 
@@ -34,6 +35,7 @@ using namespace std;
 
 enum EMsgId
 {
+	MSG_ID_UNKNOWN			= 0x00,
 	MSG_ID_PATH				= 0x01,
 	MSG_ID_PATH_CORRECTION	= 0x02,
 	MSG_ID_WORKSHOP_ORDER	= 0x03,
