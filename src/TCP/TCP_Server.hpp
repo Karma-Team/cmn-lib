@@ -1,19 +1,19 @@
 /**
- * "COM_TcpServer.hpp"
+ * "TCP_Server.hpp"
  **/
 
 
 
-#ifndef INC_COMTCPSERVER_HPP_
-#define INC_COMTCPSERVER_HPP_
+#ifndef INC_TCPSERVER_HPP_
+#define INC_TCPSERVER_HPP_
 
 
 
-#include "COM_TcpCommon.hpp"
+#include "TCP_Common.hpp"
 
 
 
-namespace COM
+namespace TCP
 {
 	/**
 		@class CTcpClient
@@ -89,4 +89,4 @@ namespace COM
 
 
 
-#endif /* INC_COMTCPSERVER_HPP_ */
+#endif /* INC_TCPSERVER_HPP_ */

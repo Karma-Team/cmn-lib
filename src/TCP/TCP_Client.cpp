@@ -1,14 +1,14 @@
 /**
- * "COM_TcpClient.cpp"
+ * "TCP_Client.cpp"
  **/
 
 
 
-#include <COM_TcpClient.hpp>
+#include "TCP_Client.hpp"
 
 
 
-COM::CTcpClient::CTcpClient()
+TCP::CTcpClient::CTcpClient()
 {
     m_serverIpAddress 				= TCP_SERVER_IP_ADDRESS;
 	m_clientSocket					= -1;
@@ -18,7 +18,7 @@ COM::CTcpClient::CTcpClient()
 
 
 
-COM::CTcpClient::CTcpClient(int p_serverSocketPort, string p_serverSocketIpAddr)
+TCP::CTcpClient::CTcpClient(int p_serverSocketPort, string p_serverSocketIpAddr)
 {
 	m_serverIpAddress				= p_serverSocketIpAddr;
 	m_clientSocket					= -1;
@@ -28,7 +28,7 @@ COM::CTcpClient::CTcpClient(int p_serverSocketPort, string p_serverSocketIpAddr)
 
 
 
-COM::CTcpClient::~CTcpClient()
+TCP::CTcpClient::~CTcpClient()
 {
     // Close the client socket
     	close(m_clientSocket);
@@ -37,7 +37,7 @@ COM::CTcpClient::~CTcpClient()
 
 
 
-int COM::CTcpClient::initTcpClient()
+int TCP::CTcpClient::initTcpClient()
 {
 	cout << "> Initialize the TCP client" << endl;
 
@@ -68,14 +68,14 @@ int COM::CTcpClient::initTcpClient()
 		}
 
 	// Reception thread : wait for response from server
-		m_receptionThread = thread(&COM::CTcpClient::receptionThread, this);
+		m_receptionThread = thread(&TCP::CTcpClient::receptionThread, this);
 
 	return m_clientSocket;
 }
 
 
 
-void COM::CTcpClient::receptionThread()
+void TCP::CTcpClient::receptionThread()
 {
 	cout << "> Reception thread launched\n";
 
@@ -127,7 +127,7 @@ void COM::CTcpClient::receptionThread()
 
 
 
-int COM::CTcpClient::sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId)
+int TCP::CTcpClient::sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId)
 {
 	if(send(m_clientSocket, &p_RequestedMsgId, sizeof(p_RequestedMsgId), 0) == -1)
 	{
@@ -141,7 +141,7 @@ int COM::CTcpClient::sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId)
 
 
 
-int COM::CTcpClient::receiveMsgHeaderFromServer()
+int TCP::CTcpClient::receiveMsgHeaderFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_msgHeader, sizeof(SMsgHeader), 0);
 	if (m_clientReceivedBytesNb == -1)
@@ -158,7 +158,7 @@ int COM::CTcpClient::receiveMsgHeaderFromServer()
 
 
 
-int COM::CTcpClient::receivePathMsgFromServer()
+int TCP::CTcpClient::receivePathMsgFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_pathMsgBody, sizeof(SPathMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
@@ -175,7 +175,7 @@ int COM::CTcpClient::receivePathMsgFromServer()
 
 
 
-int COM::CTcpClient::receivePathCorrectionMsgFromServer()
+int TCP::CTcpClient::receivePathCorrectionMsgFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_pathCorrectionMsgBody, sizeof(SPathCorrectionMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
@@ -192,7 +192,7 @@ int COM::CTcpClient::receivePathCorrectionMsgFromServer()
 
 
 
-int COM::CTcpClient::receiveWorkShopOrderMsgFromServer()
+int TCP::CTcpClient::receiveWorkShopOrderMsgFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_workShopOrderMsgBody, sizeof(SWorkShopOrderMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
@@ -209,7 +209,7 @@ int COM::CTcpClient::receiveWorkShopOrderMsgFromServer()
 
 
 
-int COM::CTcpClient::receiveStopMsgFromServer()
+int TCP::CTcpClient::receiveStopMsgFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_stopMsgBody, sizeof(SStopMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
@@ -226,7 +226,7 @@ int COM::CTcpClient::receiveStopMsgFromServer()
 
 
 
-int COM::CTcpClient::receiveWorkShopReportMsgFromServer()
+int TCP::CTcpClient::receiveWorkShopReportMsgFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_workShopReportMsgBody, sizeof(SWorkShopReportMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
@@ -243,7 +243,7 @@ int COM::CTcpClient::receiveWorkShopReportMsgFromServer()
 
 
 
-int COM::CTcpClient::receiveBitReportMsgFromServer()
+int TCP::CTcpClient::receiveBitReportMsgFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_bitReportMsgBody, sizeof(SBitReportMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)
@@ -260,7 +260,7 @@ int COM::CTcpClient::receiveBitReportMsgFromServer()
 
 
 
-int COM::CTcpClient::receiveErrorMsgFromServer()
+int TCP::CTcpClient::receiveErrorMsgFromServer()
 {
 	m_clientReceivedBytesNb = recv(m_clientSocket, &m_errorMsgBody, sizeof(SErrorMsgBody), 0);
 	if (m_clientReceivedBytesNb == -1)

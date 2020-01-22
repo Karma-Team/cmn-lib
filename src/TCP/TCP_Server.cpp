@@ -1,14 +1,14 @@
 /**
- * "COM_TcpServer.cpp"
+ * "TCP_Server.cpp"
  **/
 
 
 
-#include <COM_TcpServer.hpp>
+#include "TCP_Server.hpp"
 
 
 
-COM::CTcpServer::CTcpServer()
+TCP::CTcpServer::CTcpServer()
 {
     m_serverSocketAddrSize			= 0;
     m_clientSocketAddrSize			= 0;
@@ -24,7 +24,7 @@ COM::CTcpServer::CTcpServer()
 
 
 
-COM::CTcpServer::CTcpServer(int p_serverSocketPort, string p_serverSocketIpAddr)
+TCP::CTcpServer::CTcpServer(int p_serverSocketPort, string p_serverSocketIpAddr)
 {
     m_serverSocketAddrSize			= 0;
     m_clientSocketAddrSize			= 0;
@@ -40,7 +40,7 @@ COM::CTcpServer::CTcpServer(int p_serverSocketPort, string p_serverSocketIpAddr)
 
 
 
-COM::CTcpServer::~CTcpServer()
+TCP::CTcpServer::~CTcpServer()
 {
     // Close the server socket
     	close(m_serverSocket);
@@ -49,7 +49,7 @@ COM::CTcpServer::~CTcpServer()
 
 
 
-int COM::CTcpServer::initTcpServer()
+int TCP::CTcpServer::initTcpServer()
 {
 	cout << "> Initialize the TCP server" << endl;
 
@@ -91,7 +91,7 @@ int COM::CTcpServer::initTcpServer()
 }
 
 
-int COM::CTcpServer::startTcpServer()
+int TCP::CTcpServer::startTcpServer()
 
 {
 	cout << "> Start the TCP server" << endl;
@@ -201,7 +201,7 @@ int COM::CTcpServer::startTcpServer()
 
 
 
-int COM::CTcpServer::sendHeaderMsgToClient(uint32_t p_msgId, uint32_t p_msgSize)
+int TCP::CTcpServer::sendHeaderMsgToClient(uint32_t p_msgId, uint32_t p_msgSize)
 {
 	m_msgHeader.id 		= p_msgId;
 	m_msgHeader.size	= p_msgSize;
@@ -218,7 +218,7 @@ int COM::CTcpServer::sendHeaderMsgToClient(uint32_t p_msgId, uint32_t p_msgSize)
 
 
 
-int COM::CTcpServer::sendPathMsgToClient()
+int TCP::CTcpServer::sendPathMsgToClient()
 {
 	if(send(m_clientSocket, &m_pathMsgBody, sizeof(SPathMsgBody), 0) == -1)
 	{
@@ -232,7 +232,7 @@ int COM::CTcpServer::sendPathMsgToClient()
 
 
 
-int COM::CTcpServer::sendPathCorrectionMsgToClient()
+int TCP::CTcpServer::sendPathCorrectionMsgToClient()
 {
 	if(send(m_clientSocket, &m_pathCorrectionMsgBody, sizeof(SPathCorrectionMsgBody), 0) == -1)
 	{
@@ -246,7 +246,7 @@ int COM::CTcpServer::sendPathCorrectionMsgToClient()
 
 
 
-int COM::CTcpServer::sendWorkShopOrderMsgToClient()
+int TCP::CTcpServer::sendWorkShopOrderMsgToClient()
 {
 	if(send(m_clientSocket, &m_workShopOrderMsgBody, sizeof(SWorkShopOrderMsgBody), 0) == -1)
 	{
@@ -260,7 +260,7 @@ int COM::CTcpServer::sendWorkShopOrderMsgToClient()
 
 
 
-int COM::CTcpServer::sendStopMsgToClient()
+int TCP::CTcpServer::sendStopMsgToClient()
 {
 	if(send(m_clientSocket, &m_stopMsgBody, sizeof(SStopMsgBody), 0) == -1)
 	{
@@ -274,7 +274,7 @@ int COM::CTcpServer::sendStopMsgToClient()
 
 
 
-int COM::CTcpServer::sendWorkShopReportMsgToClient()
+int TCP::CTcpServer::sendWorkShopReportMsgToClient()
 {
 	if(send(m_clientSocket, &m_workShopReportMsgBody, sizeof(SWorkShopReportMsgBody), 0) == -1)
 	{
@@ -288,7 +288,7 @@ int COM::CTcpServer::sendWorkShopReportMsgToClient()
 
 
 
-int COM::CTcpServer::sendBitReportMsgToClient()
+int TCP::CTcpServer::sendBitReportMsgToClient()
 {
 	if(send(m_clientSocket, &m_bitReportMsgBody, sizeof(SBitReportMsgBody), 0) == -1)
 	{
@@ -302,7 +302,7 @@ int COM::CTcpServer::sendBitReportMsgToClient()
 
 
 
-int COM::CTcpServer::sendErrorMsgToClient()
+int TCP::CTcpServer::sendErrorMsgToClient()
 {
 	if(send(m_clientSocket, &m_errorMsgBody, sizeof(SErrorMsgBody), 0) == -1)
 	{
