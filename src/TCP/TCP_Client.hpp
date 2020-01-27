@@ -46,41 +46,17 @@ namespace TCP
 			int initTcpClient();
 
 			/**
-				@brief method to send a request message ID to TCP server
+				@brief method to request a message to TCP server
 				@param[in] p_RequestedMsgId : client requested message ID
 				@return -1 if failed
 			 **/
-			int sendRequestedMsgIdToServer(uint32_t p_RequestedMsgId);
-
-			/**
-				@brief methods to receive a message from TCP server
-				@return -1 if failed
-			 **/
-			void 	receptionThread();
-			int 	receiveMsgHeaderFromServer();
-			int 	receivePathMsgFromServer();
-			int 	receivePathCorrectionMsgFromServer();
-			int 	receiveWorkShopOrderMsgFromServer();
-			int 	receiveStopMsgFromServer();
-			int 	receiveWorkShopReportMsgFromServer();
-			int 	receiveBitReportMsgFromServer();
-			int 	receiveErrorMsgFromServer();
+			int requestdMsgToServer(uint32_t p_requestedMsgId, void * p_buffer);
 
 		private:
-			thread					m_receptionThread;						//< TCP client reception thread for message from server
-			SMsgHeader 				m_msgHeader;							//< TCP client reception buffer for message header from server
-			SPathMsgBody 			m_pathMsgBody; 							//< TCP client reception buffer for path message from server
-			SPathCorrectionMsgBody	m_pathCorrectionMsgBody;				//< TCP client reception buffer for path correction message from server
-			SWorkShopOrderMsgBody 	m_workShopOrderMsgBody;					//< TCP client reception buffer for workshop order message from server
-			SStopMsgBody		 	m_stopMsgBody;							//< TCP client reception buffer for stop message from server
-			SWorkShopReportMsgBody	m_workShopReportMsgBody;				//< TCP client reception buffer for workshop order report message
-			SBitReportMsgBody 		m_bitReportMsgBody;						//< TCP client reception buffer for bit report message from server from server
-			SErrorMsgBody 			m_errorMsgBody;							//< TCP client reception buffer for error message from server
-		    sockaddr_in 			m_serverSocketAddr;						//< TCP server socket address
-		    string 					m_serverIpAddress;						//< TCP server IP address
-		    int 					m_clientSocket;							//< TCP client socket
-		    int 					m_serverSocketPort;						//< TCP server socket port
-			int 					m_clientReceivedBytesNb;				//< TCP client received bytes number from TCP server
+			sockaddr_in 			m_serverSocketAddr;						//< TCP server socket address
+			string 					m_serverIpAddress;						//< TCP server IP address
+			int 					m_clientSocket;							//< TCP client socket
+			int 					m_serverSocketPort;						//< TCP server socket port
 	};
 }
 

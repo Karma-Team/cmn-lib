@@ -11,15 +11,10 @@
 TCP::CTcpServer::CTcpServer()
 {
     m_serverSocketAddrSize			= 0;
-    m_clientSocketAddrSize			= 0;
     m_serverIpAddress 				= TCP_SERVER_IP_ADDRESS;
     m_serverSocketPort				= TCP_SERVER_PORT;
-    m_serverReceivedBytesNb 		= 0;
+    m_serverClientNb 				= 0;
 	m_serverSocket					= -1;
-	m_clientSocket					= -1;
-    strcpy(m_serverReceivedBuffer, 	"");
-    strcpy(m_clientName, 			"");
-    strcpy(m_clientPort, 			"");
 }
 
 
@@ -27,15 +22,10 @@ TCP::CTcpServer::CTcpServer()
 TCP::CTcpServer::CTcpServer(int p_serverSocketPort, string p_serverSocketIpAddr)
 {
     m_serverSocketAddrSize			= 0;
-    m_clientSocketAddrSize			= 0;
     m_serverIpAddress 				= p_serverSocketIpAddr;
     m_serverSocketPort				= p_serverSocketPort;
-    m_serverReceivedBytesNb 		= 0;
+    m_serverClientNb 				= 0;
 	m_serverSocket					= -1;
-	m_clientSocket					= -1;
-    strcpy(m_serverReceivedBuffer, 	"");
-    strcpy(m_clientName, 			"");
-    strcpy(m_clientPort, 			"");
 }
 
 
@@ -87,140 +77,125 @@ int TCP::CTcpServer::initTcpServer()
 		}
 		cout << "> Client connections enabled to the TCP server socket" << endl;
 
+	// Start the TCP server
+		m_startThread = thread(&TCP::CTcpServer::startTcpServer, this);
+
 	return m_serverSocket;
 }
 
 
-int TCP::CTcpServer::startTcpServer()
+void TCP::CTcpServer::startTcpServer()
 
 {
 	cout << "> Start the TCP server" << endl;
 
-	int 	l_clientRequestedMsgId[1];
+    socklen_t 	l_clientSocketAddrSize;
 
 	if(m_serverSocket != -1)
 	{
-		// Wait for a client connection
-			m_clientSocketAddrSize 	= sizeof(m_clientSocketAddr);
-			m_clientSocket 			= accept(m_serverSocket, (sockaddr*)&m_clientSocketAddr, &m_clientSocketAddrSize);
+		while(m_serverClientNb < SOMAXCONN)
+		{
+			// Wait for a client connection
+				l_clientSocketAddrSize				= sizeof(sockaddr_in);
+				m_clientSocket[m_serverClientNb] 	= accept(m_serverSocket, (sockaddr*)&m_clientSocketAddr[m_serverClientNb], &l_clientSocketAddrSize);
 
-		// Translate the client socket address to a location and a service name
-			memset(m_clientName, 0, NI_MAXHOST);
-			memset(m_clientPort, 0, NI_MAXSERV);
-			if(getnameinfo((sockaddr*)&m_clientSocketAddr, sizeof(m_clientSocketAddr), m_clientName, NI_MAXHOST, m_clientPort, NI_MAXSERV, 0) == 0)
-			{
-				cout << "> " << m_clientName << " connected on port " << m_clientPort << endl;
-			}
-			else
-			{
-				inet_ntop(AF_INET, &m_clientSocketAddr.sin_addr, m_clientName, NI_MAXHOST);
-				cout << "> " << m_clientName << " connected on port " << ntohs(m_clientSocketAddr.sin_port) << endl;
-			}
-
-		// While loop: accept and echo message back to client
-			while(true)
-			{
-				// Initialize the buffer
-					memset(m_serverReceivedBuffer, 0, BUFFER_SIZE);
-
-				// Wait for the client to send data
-					m_serverReceivedBytesNb = recv(m_clientSocket, l_clientRequestedMsgId, sizeof(l_clientRequestedMsgId), 0);
-					if(m_serverReceivedBytesNb == -1)
-					{
-						cerr << "> Error in recv()! Quitting" << endl;
-						break;
-					}
-					if(m_serverReceivedBytesNb == 0)
-					{
-						cout << "> Client disconnected! Quitting " << endl;
-						break;
-					}
-
-				// Send requested message to client
-					switch(l_clientRequestedMsgId[0])
-					{
-						case MSG_ID_PATH:
-							cout << "> Requested message from client : MSG_ID_PATH\n";
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SPathMsgBody));
-							sendPathMsgToClient();
-							break;
-
-						case MSG_ID_PATH_CORRECTION:
-							cout << "> Requested message from client : MSG_ID_PATH_CORRECTION\n";
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SPathCorrectionMsgBody));
-							sendPathCorrectionMsgToClient();
-							break;
-
-						case MSG_ID_WORKSHOP_ORDER:
-							cout << "> Requested message from client : MSG_ID_WORKSHOP_ORDER\n";
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SWorkShopOrderMsgBody));
-							sendWorkShopOrderMsgToClient();
-							break;
-
-						case MSG_ID_STOP:
-							cout << "> Requested message from client : MSG_ID_STOP\n";
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SStopMsgBody));
-							sendStopMsgToClient();
-							break;
-
-						case MSG_ID_WORKSHOP_REPORT:
-							cout << "> Requested message from client : MSG_ID_WORKSHOP_REPORT\n";
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SWorkShopReportMsgBody));
-							sendWorkShopReportMsgToClient();
-							break;
-
-						case MSG_ID_BIT_REPORT:
-							cout << "> Requested message from client : MSG_ID_BIT_REPORT\n";
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SBitReportMsgBody));
-							sendBitReportMsgToClient();
-							break;
-
-						case MSG_ID_ERROR:
-							cout << "> Requested message from client : MSG_ID_ERROR\n";
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], sizeof(SErrorMsgBody));
-							sendErrorMsgToClient();
-							break;
-
-						default:
-							sendHeaderMsgToClient(l_clientRequestedMsgId[0], 0);
-							cout << "> Unknown message ID\n";
-					}
-			}
-
-		// Close the client socket
-			close(m_clientSocket);
+			// Create a client thread
+				m_clientThread[m_serverClientNb] = thread(&TCP::CTcpServer::clientThread, this, m_serverClientNb);
+				m_serverClientNb++;
+		}
 	}
 	else
 	{
 		cerr << "> TCP server is not initialized! Quitting" << endl;
-		return -1;
 	}
+}
 
-	return 1;
+
+void TCP::CTcpServer::clientThread(uint32_t p_clientId)
+{
+	cout << "> Client thread launched\n";
+
+	uint32_t 	l_clientRequestedMsgId;
+	int			l_receivedBytesNb;
+
+	// Translate the client socket address to a location and a service name
+		memset(m_clientName[p_clientId], 0, NI_MAXHOST);
+		memset(m_clientPort[p_clientId], 0, NI_MAXSERV);
+		if(getnameinfo((sockaddr*)&m_clientSocketAddr[p_clientId], sizeof(m_clientSocketAddr[p_clientId]), m_clientName[p_clientId], NI_MAXHOST, m_clientPort[p_clientId], NI_MAXSERV, 0) == 0)
+		{
+			cout << "> " << m_clientName[p_clientId] << " connected on port " << m_clientPort[p_clientId] << endl;
+		}
+		else
+		{
+			inet_ntop(AF_INET, &this->m_clientSocketAddr[p_clientId].sin_addr, this->m_clientName[p_clientId], NI_MAXHOST);
+			cout << "> " << this->m_clientName[p_clientId] << " connected on port " << ntohs(this->m_clientSocketAddr[p_clientId].sin_port) << endl;
+		}
+
+	// Wait requested message ID from client
+		while(true)
+		{
+			// Receive requested message ID from client
+				l_receivedBytesNb = recv(m_clientSocket[p_clientId], &l_clientRequestedMsgId, sizeof(uint32_t), 0);
+				if(l_receivedBytesNb == -1)
+				{
+					cerr << "> Error in recv()! Quitting" << endl;
+					break;
+				}
+				if(l_receivedBytesNb == 0)
+				{
+					cout << "> Client disconnected! Quitting " << endl;
+					break;
+				}
+
+			// Send requested message to client
+				switch(l_clientRequestedMsgId)
+				{
+					case MSG_ID_PATH:
+						cout << "> Requested message from client : MSG_ID_PATH\n";
+						this->sendPathMsgToClient(p_clientId);
+						break;
+
+					case MSG_ID_PATH_CORRECTION:
+						cout << "> Requested message from client : MSG_ID_PATH_CORRECTION\n";
+						this->sendPathCorrectionMsgToClient(p_clientId);
+						break;
+
+					case MSG_ID_WORKSHOP_ORDER:
+						cout << "> Requested message from client : MSG_ID_WORKSHOP_ORDER\n";
+						this->sendWorkShopOrderMsgToClient(p_clientId);
+						break;
+
+					case MSG_ID_STOP:
+						cout << "> Requested message from client : MSG_ID_STOP\n";
+						sendStopMsgToClient(p_clientId);
+						break;
+
+					case MSG_ID_WORKSHOP_REPORT:
+						cout << "> Requested message from client : MSG_ID_WORKSHOP_REPORT\n";
+						sendWorkShopReportMsgToClient(p_clientId);
+						break;
+
+					case MSG_ID_BIT_REPORT:
+						cout << "> Requested message from client : MSG_ID_BIT_REPORT\n";
+						sendBitReportMsgToClient(p_clientId);
+						break;
+
+					case MSG_ID_ERROR:
+						cout << "> Requested message from client : MSG_ID_ERROR\n";
+						sendErrorMsgToClient(p_clientId);
+						break;
+
+					default:
+						cout << "> Unknown message ID\n";
+				}
+		}
 }
 
 
 
-int TCP::CTcpServer::sendHeaderMsgToClient(uint32_t p_msgId, uint32_t p_msgSize)
+int TCP::CTcpServer::sendPathMsgToClient(uint32_t p_clientId)
 {
-	m_msgHeader.id 		= p_msgId;
-	m_msgHeader.size	= p_msgSize;
-
-	if(send(m_clientSocket, &m_msgHeader, sizeof(SMsgHeader), 0) == -1)
-	{
-		cout << "> Can't send message header to client! Quitting " << endl;
-		return -1;
-	}
-	cout << "> Message header sent to client" << "\n";
-
-	return 1;
-}
-
-
-
-int TCP::CTcpServer::sendPathMsgToClient()
-{
-	if(send(m_clientSocket, &m_pathMsgBody, sizeof(SPathMsgBody), 0) == -1)
+	if(send(m_clientSocket[p_clientId], &m_pathMsgBody, sizeof(SPathMsgBody), 0) == -1)
 	{
 		cout << "> Can't send path message to client! Quitting " << endl;
 		return -1;
@@ -232,9 +207,9 @@ int TCP::CTcpServer::sendPathMsgToClient()
 
 
 
-int TCP::CTcpServer::sendPathCorrectionMsgToClient()
+int TCP::CTcpServer::sendPathCorrectionMsgToClient(uint32_t p_clientId)
 {
-	if(send(m_clientSocket, &m_pathCorrectionMsgBody, sizeof(SPathCorrectionMsgBody), 0) == -1)
+	if(send(m_clientSocket[p_clientId], &m_pathCorrectionMsgBody, sizeof(SPathCorrectionMsgBody), 0) == -1)
 	{
 		cout << "> Can't send path correction message to client! Quitting " << endl;
 		return -1;
@@ -246,9 +221,9 @@ int TCP::CTcpServer::sendPathCorrectionMsgToClient()
 
 
 
-int TCP::CTcpServer::sendWorkShopOrderMsgToClient()
+int TCP::CTcpServer::sendWorkShopOrderMsgToClient(uint32_t p_clientId)
 {
-	if(send(m_clientSocket, &m_workShopOrderMsgBody, sizeof(SWorkShopOrderMsgBody), 0) == -1)
+	if(send(m_clientSocket[p_clientId], &m_workShopOrderMsgBody, sizeof(SWorkShopOrderMsgBody), 0) == -1)
 	{
 		cout << "> Can't send workshop order message to client! Quitting " << endl;
 		return -1;
@@ -260,9 +235,9 @@ int TCP::CTcpServer::sendWorkShopOrderMsgToClient()
 
 
 
-int TCP::CTcpServer::sendStopMsgToClient()
+int TCP::CTcpServer::sendStopMsgToClient(uint32_t p_clientId)
 {
-	if(send(m_clientSocket, &m_stopMsgBody, sizeof(SStopMsgBody), 0) == -1)
+	if(send(m_clientSocket[p_clientId], &m_stopMsgBody, sizeof(SStopMsgBody), 0) == -1)
 	{
 		cout << "> Can't send stop message to client! Quitting " << endl;
 		return -1;
@@ -274,9 +249,9 @@ int TCP::CTcpServer::sendStopMsgToClient()
 
 
 
-int TCP::CTcpServer::sendWorkShopReportMsgToClient()
+int TCP::CTcpServer::sendWorkShopReportMsgToClient(uint32_t p_clientId)
 {
-	if(send(m_clientSocket, &m_workShopReportMsgBody, sizeof(SWorkShopReportMsgBody), 0) == -1)
+	if(send(m_clientSocket[p_clientId], &m_workShopReportMsgBody, sizeof(SWorkShopReportMsgBody), 0) == -1)
 	{
 		cout << "> Can't send workshop report message to client! Quitting " << endl;
 		return -1;
@@ -288,9 +263,9 @@ int TCP::CTcpServer::sendWorkShopReportMsgToClient()
 
 
 
-int TCP::CTcpServer::sendBitReportMsgToClient()
+int TCP::CTcpServer::sendBitReportMsgToClient(uint32_t p_clientId)
 {
-	if(send(m_clientSocket, &m_bitReportMsgBody, sizeof(SBitReportMsgBody), 0) == -1)
+	if(send(m_clientSocket[p_clientId], &m_bitReportMsgBody, sizeof(SBitReportMsgBody), 0) == -1)
 	{
 		cout << "> Can't send bit report message to client! Quitting " << endl;
 		return -1;
@@ -302,9 +277,9 @@ int TCP::CTcpServer::sendBitReportMsgToClient()
 
 
 
-int TCP::CTcpServer::sendErrorMsgToClient()
+int TCP::CTcpServer::sendErrorMsgToClient(uint32_t p_clientId)
 {
-	if(send(m_clientSocket, &m_errorMsgBody, sizeof(SErrorMsgBody), 0) == -1)
+	if(send(m_clientSocket[p_clientId], &m_errorMsgBody, sizeof(SErrorMsgBody), 0) == -1)
 	{
 		cout << "> Can't send Error message to client! Quitting " << endl;
 		return -1;

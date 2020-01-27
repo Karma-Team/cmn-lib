@@ -4,8 +4,8 @@
 
 
 
-#ifndef INC_COMTCPCOMMON_HPP_
-#define INC_COMTCPCOMMON_HPP_
+#ifndef INC_TCPCOMMON_HPP_
+#define INC_TCPCOMMON_HPP_
 
 
 
@@ -24,7 +24,6 @@
 
 #define TCP_SERVER_IP_ADDRESS	"127.0.0.1"
 #define TCP_SERVER_PORT			54000
-#define BUFFER_SIZE				4096
 #define MAX_PATH_POINTS			10
 
 
@@ -114,4 +113,4 @@ struct SErrorMsgBody
 
 
 
-#endif /* INC_COMTCPCOMMON_HPP_ */
+#endif /* INC_TCPCOMMON_HPP_ */
