@@ -135,11 +135,17 @@ namespace SSV
 				@brief method to set command parameters
 			 **/
 			int setCmdParameters(uint32_t p_cmd, unsigned char* p_buffer, double* p_parameter);
+		
+			/**
+				@brief recuperation du busy flag
+			**/
+			bool getBusyFlag();
 
 		private:
 			string		m_deviceSerialPortName;
 			uint32_t	m_deviceSerialPortBaudRate;
 			int 		m_deviceSerialPort;
+			bool		m_busyFlag;
 	};
 }
 
