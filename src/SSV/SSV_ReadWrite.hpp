@@ -17,6 +17,7 @@
 #include <fcntl.h> 		// Contains file controls like O_RDWR
 #include <termios.h> 	// Contains POSIX terminal control definitions
 #include <unistd.h> 	// write(), read(), close()
+#include <mutex>
 
 
 
@@ -66,10 +67,6 @@
 
 
 
-using namespace std;
-
-
-
 namespace SSV
 {
 	/**
@@ -89,7 +86,7 @@ namespace SSV
 				@param[in] p_deviceSerialPortName : device serial port name
 				@param[in] p_deviceSerialPorteBaudRate : device serial port baud rate
 			 **/
-			CLx16a(string p_deviceSerialPortName, uint32_t p_deviceSerialPortBaudRate);
+			CLx16a(std::string p_deviceSerialPortName, uint32_t p_deviceSerialPortBaudRate);
 
 			/**
 				@brief destructor
@@ -136,16 +133,11 @@ namespace SSV
 			 **/
 			int setCmdParameters(uint32_t p_cmd, unsigned char* p_buffer, double* p_parameter);
 		
-			/**
-				@brief recuperation du busy flag
-			**/
-			bool getBusyFlag();
-
 		private:
-			string		m_deviceSerialPortName;
-			uint32_t	m_deviceSerialPortBaudRate;
-			int 		m_deviceSerialPort;
-			bool		m_busyFlag;
+			std::string		m_deviceSerialPortName;
+			uint32_t		m_deviceSerialPortBaudRate;
+			int 			m_deviceSerialPort;
+			std::mutex 		m_mutexSerialCom;
 	};
 }
 

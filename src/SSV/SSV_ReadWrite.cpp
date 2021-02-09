@@ -13,17 +13,15 @@ SSV::CLx16a::CLx16a()
 	m_deviceSerialPortName 		= SSV_DEFAULT_DEVICE_SERIAL_PORT_NAME;
 	m_deviceSerialPortBaudRate	= SSV_DEFAULT_DEVICE_SERIAL_PORT_BAUD_RATE;
 	m_deviceSerialPort			= -1;
-	m_busyFlag = false;
 }
 
 
 
-SSV::CLx16a::CLx16a(string p_deviceSerialPortName, uint32_t p_deviceSerialPorteBaudRate)
+SSV::CLx16a::CLx16a(std::string p_deviceSerialPortName, uint32_t p_deviceSerialPorteBaudRate)
 {
 	m_deviceSerialPortName 		= p_deviceSerialPortName;
 	m_deviceSerialPortBaudRate	= p_deviceSerialPorteBaudRate;
 	m_deviceSerialPort			= -1;
-	m_busyFlag = false;
 }
 
 
@@ -253,7 +251,6 @@ int SSV::CLx16a::initDeviceSerialPort()
 
 int SSV::CLx16a::writeDeviceSerialPort(uint32_t p_servoId, uint32_t p_cmd, double* p_parameter)
 {
-	m_busyFlag = true;
 	uint32_t 		l_cmdLengthInBytes;		//< Include : data length, command value, command parameters and checksum
 	uint32_t 		l_parametersBytesSize;
 	uint32_t 		l_bufferBytesSize;
@@ -285,9 +282,11 @@ int SSV::CLx16a::writeDeviceSerialPort(uint32_t p_servoId, uint32_t p_cmd, doubl
 			l_buffer[l_bufferBytesSize-1] = getCmdChecksum(l_buffer, l_bufferBytesSize);
 
 	// Write on the device serial port
-		write(m_deviceSerialPort, l_buffer, l_bufferBytesSize);
+		{
+			std::scoped_lock lock(m_mutexSerialCom);
+			write(m_deviceSerialPort, l_buffer, l_bufferBytesSize);
+		}
 	
-	m_busyFlag = false;
 	return 1;
 }
 
@@ -295,7 +294,6 @@ int SSV::CLx16a::writeDeviceSerialPort(uint32_t p_servoId, uint32_t p_cmd, doubl
 
 int SSV::CLx16a::readDeviceSerialPort(uint32_t p_servoId, uint32_t p_cmd, void* p_buffer)
 {
-	m_busyFlag = true;
 	uint32_t 		l_retCmdLengthInBytes;		//< Include : data length, command value, command parameters and checksum
 	uint32_t 		l_cmdLengthInBytes;			//< Include : data length, command value, command parameters and checksum
 	uint32_t 		l_parametersBytesSize;
@@ -312,13 +310,15 @@ int SSV::CLx16a::readDeviceSerialPort(uint32_t p_servoId, uint32_t p_cmd, void* 
 	// Read on the device serial port
 		l_parameters[0] = 0;
 		writeDeviceSerialPort(p_servoId, p_cmd, l_parameters);
-		l_readBytesNb = read(m_deviceSerialPort, l_buffer, l_bufferBytesSize);
+		{
+			std::scoped_lock lock(m_mutexSerialCom);
+			l_readBytesNb = read(m_deviceSerialPort, l_buffer, l_bufferBytesSize);
+		}
 
 	// Convert the result
 		l_cmdLengthInBytes = getCmdLength(p_cmd);
 		convertCmdParameters(p_cmd, l_cmdLengthInBytes, l_buffer, p_buffer);
 	
-	m_busyFlag = false;
 	return 1;
 }
 
@@ -760,9 +760,4 @@ uint32_t SSV::CLx16a::convertCmdParameters(uint32_t p_cmd, uint32_t p_cmdLengthI
 	}
 
 	return 1;
-}
-
-bool SSV::CLx16a::getBusyFlag()
-{
-	return m_busyFlag;
 }
