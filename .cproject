@@ -46,8 +46,8 @@
 									<listOptionValue builtIn="false" value="/opt/raspi/include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/cmn-lib/src}&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.dialect.std.1781231394" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.dialect.flags.1518795002" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-std=c++17 -pthread -lpthread -D_REENTRANT" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.1781231394" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++2a" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.flags.1518795002" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-pthread -lpthread -D_REENTRANT" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.compiler.option.include.files.1831521296" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false" valueType="includeFiles"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.368212035" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
